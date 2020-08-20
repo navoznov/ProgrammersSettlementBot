@@ -5,7 +5,7 @@ import time
 import datetime
 
 # telegram bot settings
-bot_url = "https://api.telegram.org/bot1287032425:AAFDsQhRDHCf1optcsadNOfyeWsdoI7a1rE/"
+bot_url = "https://api.telegram.org/bot1273100614:AAHERAdteuCzmsDbkTyuvq2cD3wALG4hX4k/"
 last_update_id = 0
 
 # mqtt
