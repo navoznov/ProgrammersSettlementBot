@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import requests
 import paho.mqtt.client as mqtt
 import paho.mqtt.subscribe as subscribe
@@ -32,7 +34,7 @@ timeout = 30
 while True:
     topics = [topic]
     mqtt_message = subscribe.simple(topics, hostname=mqtt_broker_url, msg_count=1)
-    # температура приходит в таком формате: b'11.9'. поэтому с начала строки отрезаем два символа и с конца один символ
+    # format: b'11.9'
     current_temperature = str(mqtt_message.payload)[2:-1]
 
     # temperature_last_update_datetime = datetime.datetime.utcnow()
