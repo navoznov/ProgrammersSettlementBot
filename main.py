@@ -13,6 +13,11 @@ last_update_id = 0
 # mqtt
 mqtt_broker_url = "broker.hivemq.com"
 topic = "navoznov/outside/temperature"
+temperature_update_interval_sec = 10
+temperature_update_interval = datetime.timedelta(seconds=temperature_update_interval_sec)
+temperature_last_update_datetime = datetime.datetime.now() - datetime.timedelta(days=1)
+
+print(temperature_last_update_datetime)
 
 current_temperature = 999
 
@@ -29,20 +34,23 @@ def get_chat_id(update):
 def get_update_id(update):
     return update['update_id']
 
-
-timeout = 30
 while True:
-    topics = [topic]
-    mqtt_message = subscribe.simple(topics, hostname=mqtt_broker_url, msg_count=1)
-    # format: b'11.9'
-    current_temperature = str(mqtt_message.payload)[2:-1]
+    now = datetime.datetime.utcnow()
+    if now > temperature_last_update_datetime + temperature_update_interval:
+        topics = [topic]
+        print("MQTT: Send request")
+        mqtt_message = subscribe.simple(topics, hostname=mqtt_broker_url, msg_count=1)
+        # payload format is b'11.9'
+        current_temperature = str(mqtt_message.payload)[2:-1]
+        print("MQTT: Response = " + current_temperature)
+        temperature_last_update_datetime = now
 
-    # temperature_last_update_datetime = datetime.datetime.utcnow()
-
-    params = {'timeout': timeout, 'offset': last_update_id + 1 }
+    params = {'timeout': 30, 'offset': last_update_id + 1 }
+    print("Telegram: Send request")
     response = requests.get(bot_url + 'getUpdates', params)
-    responseJson = response.json()
+    responseJson = response.json()    
     results = responseJson['result']
+    print("Telegram: " + str(len(results)) + " results")
     if len(results) > 0:
         last_update_id = max(map(get_update_id, results))
         chatIds = list(set(map(get_chat_id, results)))
@@ -50,4 +58,4 @@ while True:
         for chat_id in chatIds:
             send_mess(chat_id, 'Сейчас в поселке ' + current_temperature + ' градусов')
     
-    time.sleep(50/1000)
+    time.sleep(10/1000)
