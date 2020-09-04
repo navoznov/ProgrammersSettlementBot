@@ -54,8 +54,9 @@ while True:
         printLog("MQTT: Response = " + current_temperature)
         temperature_last_update_datetime = now
 
-    params = {'timeout': 30, 'offset': last_update_id + 1}
-    printLog("Telegram: Send request")
+    offset = last_update_id + 1
+    params = {'timeout': 30, 'offset': offset}
+    printLog("Telegram: Sending request. Offset={}".format(offset))
     response = requests.get(bot_url + 'getUpdates', params)
     responseJson = response.json()
     results = responseJson['result']
