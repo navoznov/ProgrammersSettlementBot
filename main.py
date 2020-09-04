@@ -38,7 +38,7 @@ def get_update_id(update):
 def printLog(message):
     now = datetime.datetime.now()
     strNow = now.strftime(datetimeFormat)
-    print(f"{strNow} {message}")
+    print("{} {}".format(strNow, message))
 
 
 while True:
