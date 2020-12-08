@@ -1,0 +1,28 @@
+{
+    "ok": true,
+    "result": [
+        {
+            "update_id": 680547782,
+            "message": {
+                "message_id": 188,
+                "from": {
+                    "id": 106599206,
+                    "is_bot": false,
+                    "first_name": "Ivan",
+                    "last_name": "Navoznov",
+                    "username": "navoznov",
+                    "language_code": "ru"
+                },
+                "chat": {
+                    "id": 106599206,
+                    "first_name": "Ivan",
+                    "last_name": "Navoznov",
+                    "username": "navoznov",
+                    "type": "private"
+                },
+                "date": 1607451120,
+                "text": "6орл"
+            }
+        }
+    ]
+}
