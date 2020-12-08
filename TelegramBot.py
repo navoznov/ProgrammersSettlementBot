@@ -81,7 +81,10 @@ class TelegramBot:
                         self.__send_message(chat_id, self.schedule_fail_message)
                 else:
                     self.__send_message(chat_id, self.schedule_parsing_fail_message)
-
+            elif text == '/list':
+                timetable = sorted([str(t.hour).zfill(2) + ':' + str(t.minute).zfill(2) for t in self.__scheduler.get_timetable_by_chat_id(chat_id)])
+                reply = 'Вы узнаете температуру ежедневно в: ' + ', '.join(timetable) + '.'
+                self.__send_message(chat_id, reply)
             elif not chat_id in notified_chat_ids:
                 self.__send_message(chat_id, temperature_message)
                 notified_chat_ids.add(chat_id)
