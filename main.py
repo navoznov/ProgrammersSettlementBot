@@ -11,7 +11,8 @@ mqttTemperatureProvider = MqttTemperatureProvider()
 
 while True:
     temperature = mqttTemperatureProvider.getActualTemperature()
-
     telegramBot.broadcastTemperature(temperature)
+
+    # todo: реализовать проверку запланированных уведомлений
 
     time.sleep(1)
