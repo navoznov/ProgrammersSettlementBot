@@ -4,7 +4,6 @@
 import time
 import datetime
 
-
 class Scheduler:
 
     def __init__(self):
@@ -29,3 +28,8 @@ class Scheduler:
     def get_chat_ids_by_time(self, hours, minutes):
         key = self.__get_timetable_key(hours, minutes)
         return self.__timeTable.get(key, set())
+
+    def get_chat_ids_by_time_range(self, minTime, maxTime):
+        result = set()
+        result.update(*[chat_ids for key, chat_ids in self.__timeTable.items() if minTime < key <= maxTime])
+        return result
