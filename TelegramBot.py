@@ -9,23 +9,23 @@ import datetime
 
 class TelegramBot:
     # telegram bot settings
-    bot_url = "https://api.telegram.org/bot1356767647:AAGH3gR8YqxsFmzrbeIWhmlCsRLHlif5c_k/"
     last_update_id = 0
-    start_message = 'Приветствую тебя, {}! Я могу сообщать текущую температуру в Поселке Программистов в ответ на любое сообщение.'
+    start_message = '{} Я могу сообщать текущую температуру в Поселке Программистов в ответ на любое сообщение.'
     schedule_question_message = 'Во сколько вам присылать температуру? Ответить можно в таком формате: 9:11, 913, 15-34, 09:20, 0745 и тп'
     schedule_success_message = 'Отлично! Теперь вы будете получать сообщения каждый день в {}:{}'
     schedule_parsing_fail_message = 'Не понятно. :( Во сколько вам присылать температуру? Ответьте в одном из форматов: 9:11, 913, 15-34, 09:20, 0745 и тп'
     schedule_fail_message = 'Не удалось запланировать. Произошла какая-то ошибка! Но это не точно.'
 
-    def __init__(self, temperature_provider, scheduler):
+    def __init__(self, bot_id, bot_api_key, temperature_provider, scheduler):
         self.__temperature_provider = temperature_provider
         self.__scheduler = scheduler
         self.__subscribers_last_notification_time = datetime.datetime.now().time()
         self.__schedule_awaiting_chat_ids = set()
+        self.__bot_url = "https://api.telegram.org/bot{}:{}/".format(bot_id, bot_api_key)
 
     def __send_message(self, chat, text):
         params = {'chat_id': chat, 'text': text}
-        response = requests.post(self.bot_url + 'sendMessage', data=params)
+        response = requests.post(self.__bot_url + 'sendMessage', data=params)
         return response
 
     def __broadcast(self, chat_ids, message):
@@ -35,7 +35,7 @@ class TelegramBot:
     def __get_updates(self):
         offset = self.last_update_id + 1
         params = {'timeout': 30, 'offset': offset}
-        response = requests.get(self.bot_url + 'getUpdates', params)
+        response = requests.get(self.__bot_url + 'getUpdates', params)
         response_json = response.json()
 
         updates = response_json['result']
@@ -71,8 +71,11 @@ class TelegramBot:
             text = message['text']
             if text == '/start':
                 # TODO: поля username может не быть
-                username = message['from']['username']
-                reply = self.start_message.format('@' + username)
+                name = message['from'].get('username', None)
+                if name == None:
+                    name = message['from'].get('first_name', None)
+                welcomeText = 'Привет!' if name == None else 'Привет, {}!'.format(name)
+                reply = self.start_message.format(welcomeText)
                 self.__send_message(chat_id, reply)
             elif text == '/schedule' or text == '/plan':
                 self.__send_message(chat_id,  self.schedule_question_message)

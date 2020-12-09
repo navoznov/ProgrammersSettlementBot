@@ -8,22 +8,23 @@ import datetime
 
 class MqttTemperatureProvider:
     # mqtt
-    mqtt_broker_url = "broker.hivemq.com"
-    topic = "navoznov/outside/temperature"
 
     temperature_update_interval_sec = 10
     temperature_update_interval = datetime.timedelta(seconds=temperature_update_interval_sec)
     temperature_last_update_datetime = datetime.datetime.now() - datetime.timedelta(days=1)
     temperature = 999
 
+    def __init__(self, mqtt_broker_url, mqtt_topic):
+        self.__broker_url = mqtt_broker_url
+        self.__mqtt_topic = mqtt_topic
 
     def getActualTemperature(self):
         now = datetime.datetime.now()
         if now > self.temperature_last_update_datetime + self.temperature_update_interval:
             self.temperature_last_update_datetime = now
 
-            topics = [self.topic]
-            mqtt_message = subscribe.simple(topics, hostname=self.mqtt_broker_url, msg_count=1)
+            topics = [self.__mqtt_topic]
+            mqtt_message = subscribe.simple(topics, hostname=self.__broker_url, msg_count=1)
             # payload format is "b'-11.9'"
             self.temperature = str(mqtt_message.payload)[2:-1]
 
