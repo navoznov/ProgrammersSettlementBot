@@ -3,3 +3,4 @@ __pycache__/MqttTemperatureProvider.cpython-38.pyc
 __pycache__/TelegramBot.cpython-38.pyc
 .vscode/.ropeproject/objectdb
 __pycache__/Scheduler.cpython-38.pyc
+__pycache__/StatisticsService.cpython-38.pyc
