@@ -33,3 +33,7 @@ class Scheduler:
         result = set()
         result.update(*[chat_ids for key, chat_ids in self.__timeTable.items() if self.__check_time_in_range(key, minTime, maxTime)])
         return result
+
+    def clear_subscriptions(self, chat_id):
+        for _, item in self.__timeTable.items():
+            item.remove(chat_id)

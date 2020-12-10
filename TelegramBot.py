@@ -77,7 +77,7 @@ class TelegramBot:
                 welcomeText = 'Привет!' if name == None else 'Привет, {}!'.format(name)
                 reply = self.start_message.format(welcomeText)
                 self.__send_message(chat_id, reply)
-            elif text == '/schedule' or text == '/plan':
+            elif text == '/schedule' or text == '/plan' or text == '/subscribe':
                 self.__send_message(chat_id,  self.schedule_question_message)
                 self.__schedule_awaiting_chat_ids.add(chat_id)
             elif chat_id in self.__schedule_awaiting_chat_ids:
@@ -96,11 +96,15 @@ class TelegramBot:
                     self.__send_message(
                         chat_id, self.schedule_parsing_fail_message)
             elif text == '/list':
-                timetable = sorted([str(t.hour).zfill(2) + ':' + str(t.minute).zfill(2)
-                                    for t in self.__scheduler.get_timetable_by_chat_id(chat_id)])
-                reply = 'Вы узнаете температуру ежедневно в: ' + \
-                    ', '.join(timetable) + '.'
+                times = self.__scheduler.get_timetable_by_chat_id(chat_id)
+                timetable = sorted([str(t.hour).zfill(2) + ':' + str(t.minute).zfill(2) for t in times])
+                timesStr = ', '.join(timetable)
+                reply = 'У вас нет подписок на увдомления о температуре.'
+                if len(times) > 0:
+                    reply = 'Вы узнаете температуру ежедневно в {}.'.format(timesStr)
                 self.__send_message(chat_id, reply)
+            elif text == '/clear':
+                self.__scheduler.clear_subscriptions(chat_id)
             elif not chat_id in notified_chat_ids:
                 self.__send_message(chat_id, temperature_message)
                 notified_chat_ids.add(chat_id)
