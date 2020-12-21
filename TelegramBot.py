@@ -68,6 +68,11 @@ class TelegramBot:
             message = update['message']
             chat_id = message['chat']['id']
 
+            # Список команд с описаниями для BotFather
+            # subscribe - Запланировать уведомление
+            # list - Вывести список запланированных уведомлений
+            # clear - Удалить все запланированные уведомления
+
             text = message['text']
             if text == '/start':
                 # TODO: поля username может не быть
