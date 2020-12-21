@@ -5,7 +5,7 @@ import requests
 import json
 import re
 import datetime
-
+import uuid
 
 class TelegramBot:
     # telegram bot settings
@@ -26,6 +26,14 @@ class TelegramBot:
     def __send_message(self, chat, text):
         params = {'chat_id': chat, 'text': text}
         response = requests.post(self.__bot_url + 'sendMessage', data=params)
+        return response
+
+    def __answer_inline_query(self, inline_query_id, text):
+        input_message_content = {'message_text': text}
+        result = { 'type': 'article', 'id': str(uuid.uuid1()), 'title': text, 'input_message_content': input_message_content, 'thumb_url': 'https://t3.ftcdn.net/jpg/01/93/96/42/240_F_193964277_ctURMub96PZdUvuZijDbRUTK5uBVmBXF.jpg' }
+        results_json = json.dumps([result])
+        params = {'inline_query_id': inline_query_id, 'results': results_json }
+        response = requests.post(self.__bot_url + 'answerInlineQuery', data=params)
         return response
 
     def __broadcast(self, chat_ids, message):
@@ -65,6 +73,13 @@ class TelegramBot:
 
         updates = self.__get_updates()
         for update in updates:
+            # обработка inline запроса
+            inline_query = update.get('inline_query', None)
+            if inline_query != None:
+                id = inline_query['id']
+                self.__answer_inline_query(id, temperature_message)
+                continue
+
             message = update['message']
             chat_id = message['chat']['id']
 
