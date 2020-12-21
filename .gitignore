@@ -3,3 +3,4 @@ __pycache__/*.pyc
 secret_data.py
 run.sh
 .vscode/launch.json
+testTelegramResponse.txt
