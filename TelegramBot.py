@@ -67,6 +67,14 @@ class TelegramBot:
             str(temperature) + ' градусов'
         return temperature_message
 
+    def __get_message(self, update):
+        message = update.get('message', None)
+        if message == None:
+            message = update.get('edited_message', None)
+
+        return message
+
+
     def processUpdates(self):
         temperature_message = self.__get_actual_temperature_message_text()
         notified_chat_ids = set()
@@ -80,11 +88,9 @@ class TelegramBot:
                 self.__answer_inline_query(id, temperature_message)
                 continue
 
-            message = update.get('message', None)
+            message = self.__get_message(update)
             if message == None:
-                message = update.get('edited_message', None)
-                if message == None:
-                    continue
+                continue
 
             chat_id = message['chat']['id']
 
