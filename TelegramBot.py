@@ -46,7 +46,7 @@ class TelegramBot:
         response = requests.get(self.__bot_url + 'getUpdates', params)
         response_json = response.json()
 
-        updates = response_json['result']
+        updates = response_json.get('result', [])
         if len(updates) > 0:
             update_ids = [update['update_id'] for update in updates]
             self.last_update_id = max(update_ids)
