@@ -19,7 +19,7 @@ class TelegramBot:
     def __init__(self, bot_id, bot_api_key, temperature_provider, scheduler):
         self.__temperature_provider = temperature_provider
         self.__scheduler = scheduler
-        self.__subscribers_last_notification_time = datetime.datetime.now().time()
+        self.__subscribers_last_notification_time = datetime.datetime.now()
         self.__schedule_awaiting_chat_ids = set()
         self.__bot_url = "https://api.telegram.org/bot{}:{}/".format(bot_id, bot_api_key)
 
@@ -130,9 +130,15 @@ class TelegramBot:
                 notified_chat_ids.add(chat_id)
 
     def processSubscribers(self):
-        now = datetime.datetime.now().time()
+        now = datetime.datetime.now()
+        delta = datetime.timedelta(minutes=1)
+        if now - self.__subscribers_last_notification_time < delta:
+            return
+
         chat_ids = self.__scheduler.get_chat_ids_by_time_range(self.__subscribers_last_notification_time, now)
+        if len(chat_ids) == 0:
+            return
+
         temperature_message = self.__get_actual_temperature_message_text()
         self.__broadcast(chat_ids, temperature_message)
         self.__subscribers_last_notification_time = now
-        return True

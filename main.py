@@ -6,9 +6,11 @@ import getopt
 import secret_data
 import time
 import datetime
+from DataBaseProvider import DataBaseProvider
+from DataBaseScheduler import DataBaseScheduler
 from TelegramBot import TelegramBot
 from MqttTemperatureProvider import MqttTemperatureProvider
-from Scheduler import Scheduler
+from MemoryScheduler import MemoryScheduler
 from StatisticsService import StatisticsService
 
 
@@ -19,9 +21,9 @@ def get_options():
     mqtt_topic = secret_data.mqtt_topic
 
     try:
-        longopts = ["bot-id=", "bot_key=", "mqtt-server=", "mqtt-topic="]
+        longopts = ["bot-id=", "bot_key=", "mqtt-server=", "mqtt-topic=", "db-filename="]
         argv = sys.argv[1:]
-        opts, args = getopt.getopt(argv, "i:k:u:t", longopts)
+        opts, args = getopt.getopt(argv, "i:k:u:t:d", longopts)
         options = {}
         for a, v in opts:
             aa = a.replace('--', '')
@@ -31,20 +33,20 @@ def get_options():
 
     return options
 
+
 options = get_options()
 
 bot_id = options['bot-id']
 bot_api_key = options['bot_key']
 mqtt_broker_url = options['mqtt-server']
 mqtt_topic = options['mqtt-topic']
+db_filename = options['db-filename']
 
-scheduler = Scheduler()
+dataBaseProvider = DataBaseProvider(db_filename)
+scheduler = DataBaseScheduler(dataBaseProvider)
 mqttTemperatureProvider = MqttTemperatureProvider(mqtt_broker_url, mqtt_topic)
 telegramBot = TelegramBot(bot_id, bot_api_key, mqttTemperatureProvider, scheduler)
 statisticsService = StatisticsService(mqttTemperatureProvider)
-
-now = datetime.datetime.now()
-last_hours, last_minutes = now.hour, now.minute
 
 TICK_INTERVAL_SEC = 5
 while True:

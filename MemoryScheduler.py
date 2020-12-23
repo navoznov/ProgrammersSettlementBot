@@ -5,7 +5,7 @@ import time
 import datetime
 
 
-class Scheduler:
+class MemoryScheduler:
 
     def __init__(self):
         self.__timeTable = {}

@@ -4,3 +4,4 @@ secret_data.py
 run.sh
 .vscode/launch.json
 testTelegramResponse.txt
+*.db
