@@ -74,6 +74,11 @@ class TelegramBot:
 
         return message
 
+    def __get_username(self, message):
+        try:
+            return message['from']['username']
+        except:
+            return None
 
     def processUpdates(self):
         temperature_message = self.__get_actual_temperature_message_text()
@@ -93,6 +98,7 @@ class TelegramBot:
                 continue
 
             chat_id = message['chat']['id']
+            username = self.__get_username(message)
 
             # Список команд с описаниями для BotFather
             # subscribe - Запланировать уведомление
@@ -102,9 +108,7 @@ class TelegramBot:
             text = message['text']
             if text == '/start':
                 # TODO: поля username может не быть
-                name = message['from'].get('username', None)
-                if name == None:
-                    name = message['from'].get('first_name', None)
+                name = username or message['from'].get('first_name', None)
                 welcomeText = 'Привет!' if name == None else 'Привет, {}!'.format(name)
                 reply = self.start_message.format(welcomeText)
                 self.__send_message(chat_id, reply)
