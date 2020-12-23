@@ -80,7 +80,12 @@ class TelegramBot:
                 self.__answer_inline_query(id, temperature_message)
                 continue
 
-            message = update['message']
+            message = update.get('message', None)
+            if message == None:
+                message = update.get('edited_message', None)
+                if message == None:
+                    continue
+
             chat_id = message['chat']['id']
 
             # Список команд с описаниями для BotFather
