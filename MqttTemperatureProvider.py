@@ -5,28 +5,28 @@ import paho.mqtt.client as mqtt
 import paho.mqtt.subscribe as subscribe
 import random
 import datetime
+import logging
 
 class MqttTemperatureProvider:
-    # mqtt
-
-    temperature_update_interval_sec = 10
-    temperature_update_interval = datetime.timedelta(seconds=temperature_update_interval_sec)
-    temperature_last_update_datetime = datetime.datetime.now() - datetime.timedelta(days=1)
-    temperature = 999
-
     def __init__(self, mqtt_broker_url, mqtt_topic):
-        self.__broker_url = mqtt_broker_url
+        self.__mqtt_broker_url = mqtt_broker_url
         self.__mqtt_topic = mqtt_topic
+        self.__temperature = -273
+        TEMPERATURE_UPDATE_INTERVAL_SEC = 10
+        self.__temperature_update_interval = datetime.timedelta(seconds=TEMPERATURE_UPDATE_INTERVAL_SEC)
+        self.__temperature_last_update_datetime = datetime.datetime.now() - datetime.timedelta(days=1)
 
     def getActualTemperature(self):
         now = datetime.datetime.now()
-        if now > self.temperature_last_update_datetime + self.temperature_update_interval:
-            self.temperature_last_update_datetime = now
-
+        if now > self.__temperature_last_update_datetime + self.__temperature_update_interval:
             topics = [self.__mqtt_topic]
-            mqtt_message = subscribe.simple(topics, hostname=self.__broker_url, msg_count=1)
-            # payload format is "b'-11.9'"
-            self.temperature = str(mqtt_message.payload)[2:-1]
+            try:
+                mqtt_message = subscribe.simple(topics, hostname=self.__mqtt_broker_url, msg_count=1)
+                # payload format is "b'-11.9'"
+                self.__temperature = str(mqtt_message.payload)[2:-1]
+                self.__temperature_last_update_datetime = now
+            except Exception as ex:
+                logging.exception('Ошибка получения температуры')
 
-        return self.temperature
+        return self.__temperature
 
