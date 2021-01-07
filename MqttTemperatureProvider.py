@@ -11,7 +11,7 @@ class MqttTemperatureProvider:
     def __init__(self, mqtt_broker_url, mqtt_topic):
         self.__mqtt_broker_url = mqtt_broker_url
         self.__mqtt_topic = mqtt_topic
-        self.__temperature = -273
+        self.__temperature = -273.0
         TEMPERATURE_UPDATE_INTERVAL_SEC = 10
         self.__temperature_update_interval = datetime.timedelta(seconds=TEMPERATURE_UPDATE_INTERVAL_SEC)
         self.__temperature_last_update_datetime = datetime.datetime.now() - datetime.timedelta(days=1)
@@ -29,4 +29,7 @@ class MqttTemperatureProvider:
                 logging.exception('Ошибка получения температуры')
 
         return self.__temperature
+
+    def get_temperature_last_update_datetime(self):
+        return self.__temperature_last_update_datetime
 
