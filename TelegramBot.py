@@ -160,6 +160,8 @@ class TelegramBot:
             elif not chat_id in notified_chat_ids:
                 self.__send_message(chat_id, temperature_message)
                 notified_chat_ids.add(chat_id)
+                # TODO: можно удалять бесполезное исходное сообщение см метод https://core.telegram.org/bots/api#deletemessage
+                # удалять нужно только прямые сообщения боту в чате с ботом, а не инлайн вызовы бота.
 
     def processSubscribers(self):
         now = datetime.datetime.now()
