@@ -6,6 +6,7 @@ import json
 import re
 import datetime
 import uuid
+import logging
 
 class TelegramBot:
     # telegram bot settings
@@ -25,16 +26,26 @@ class TelegramBot:
 
     def __send_message(self, chat, text):
         params = {'chat_id': chat, 'text': text}
-        response = requests.post(self.__bot_url + 'sendMessage', data=params)
-        return response
+        try:
+            response = requests.post(self.__bot_url + 'sendMessage', data=params)
+            return response
+        except Exception as e:
+            logging.exception('Ошибка Telegram API sendMessage.')
+            return None
+
 
     def __answer_inline_query(self, inline_query_id, text):
         input_message_content = {'message_text': text}
         result = { 'type': 'article', 'id': str(uuid.uuid1()), 'title': text, 'input_message_content': input_message_content, 'thumb_url': 'https://t3.ftcdn.net/jpg/01/93/96/42/240_F_193964277_ctURMub96PZdUvuZijDbRUTK5uBVmBXF.jpg' }
         results_json = json.dumps([result])
         params = {'inline_query_id': inline_query_id, 'results': results_json }
-        response = requests.post(self.__bot_url + 'answerInlineQuery', data=params)
-        return response
+        try:
+            response = requests.post(self.__bot_url + 'answerInlineQuery', data=params)
+            return response
+        except Exception as e:
+            logging.exception('Ошибка Telegram API answerInlineQuery.')
+            return None
+
 
     def __broadcast(self, chat_ids, message):
         for chat_id in chat_ids:
@@ -43,8 +54,12 @@ class TelegramBot:
     def __get_updates(self):
         offset = self.last_update_id + 1
         params = {'timeout': 30, 'offset': offset}
-        response = requests.get(self.__bot_url + 'getUpdates', params)
-        response_json = response.json()
+        response_json = {}
+        try:
+            response = requests.get(self.__bot_url + 'getUpdates', params)
+            response_json = response.json()
+        except Exception as e:
+            logging.exception('Ошибка Telegram API getUpdates.')
 
         updates = response_json.get('result', [])
         if len(updates) > 0:
@@ -52,8 +67,8 @@ class TelegramBot:
             self.last_update_id = max(update_ids)
         return updates
 
-    def __parseTime(self, timeStr):
-        regex = r'^(?P<hours>\d{1,2}?)[:\-/\\]?(?P<minutes>\d{1,2})$'
+    def __parseTime(self,    timeStr):
+        regex = r'^(?P<hours>\d{1,2}?)[:\-/\\ ]?(?P<minutes>\d{1,2})$'
         result = re.search(regex, timeStr)
         if result == None:
             return (False, None)
@@ -76,6 +91,7 @@ class TelegramBot:
 
     def __get_username(self, message):
         try:
+            # TODO: переделать на {}.get(...), избавиться от try-catch
             return message['from']['username']
         except:
             return None
@@ -90,6 +106,7 @@ class TelegramBot:
             inline_query = update.get('inline_query', None)
             if inline_query != None:
                 id = inline_query['id']
+                # TODO: обрабатывать результат __answer_inline_query, чтобы убедиться что ответы отправлены
                 self.__answer_inline_query(id, temperature_message)
                 continue
 
