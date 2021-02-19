@@ -17,12 +17,15 @@ class TelegramBot:
     schedule_parsing_fail_message = 'Не понятно. :( Во сколько вам присылать температуру? Ответьте в одном из форматов: 9:11, 913, 15-34, 09:20, 0745 и тп'
     schedule_fail_message = 'Не удалось запланировать. Произошла какая-то ошибка! Но это не точно.'
 
-    def __init__(self, bot_id, bot_api_key, temperature_provider, scheduler):
+
+    def __init__(self, bot_id, bot_api_key, should_use_subscriptions, temperature_provider, scheduler):
         self.__temperature_provider = temperature_provider
         self.__scheduler = scheduler
         self.__subscribers_last_notification_time = datetime.datetime.now()
         self.__schedule_awaiting_chat_ids = set()
         self.__bot_url = "https://api.telegram.org/bot{}:{}/".format(bot_id, bot_api_key)
+        self.__should_use_subscriptions = should_use_subscriptions
+
 
     def __send_message(self, chat, text):
         params = {'chat_id': chat, 'text': text}
@@ -51,6 +54,7 @@ class TelegramBot:
         for chat_id in chat_ids:
             self.__send_message(chat_id, message)
 
+
     def __get_updates(self):
         offset = self.last_update_id + 1
         params = {'timeout': 30, 'offset': offset}
@@ -67,6 +71,7 @@ class TelegramBot:
             self.last_update_id = max(update_ids)
         return updates
 
+
     def __parseTime(self,    timeStr):
         regex = r'^(?P<hours>\d{1,2}?)[:\-/\\ ]?(?P<minutes>\d{1,2})$'
         result = re.search(regex, timeStr)
@@ -76,11 +81,13 @@ class TelegramBot:
         minutes = result.group('minutes')
         return (True, (int(hours), int(minutes)))
 
+
     def __get_actual_temperature_message_text(self):
         temperature = self.__temperature_provider.getActualTemperature()
         temperature_message = 'Сейчас в поселке ' + \
             str(temperature) + ' градусов'
         return temperature_message
+
 
     def __get_message(self, update):
         message = update.get('message', None)
@@ -89,12 +96,14 @@ class TelegramBot:
 
         return message
 
+
     def __get_username(self, message):
         try:
             # TODO: переделать на {}.get(...), избавиться от try-catch
             return message['from']['username']
         except:
             return None
+
 
     def processUpdates(self):
         temperature_message = self.__get_actual_temperature_message_text()
@@ -130,8 +139,12 @@ class TelegramBot:
                 reply = self.start_message.format(welcomeText)
                 self.__send_message(chat_id, reply)
             elif text == '/schedule' or text == '/plan' or text == '/subscribe':
-                self.__send_message(chat_id,  self.schedule_question_message)
-                self.__schedule_awaiting_chat_ids.add(chat_id)
+                if self.__should_use_subscriptions:
+                    self.__send_message(chat_id, self.schedule_question_message)
+                    self.__schedule_awaiting_chat_ids.add(chat_id)
+                else:
+                    self.__send_message(chat_id, "Подписки отключены")
+
             elif chat_id in self.__schedule_awaiting_chat_ids:
                 is_success, time = self.__parseTime(text)
                 if is_success:
@@ -148,22 +161,32 @@ class TelegramBot:
                     self.__send_message(
                         chat_id, self.schedule_parsing_fail_message)
             elif text == '/list':
-                times = self.__scheduler.get_timetable_by_chat_id(chat_id)
-                timetable = sorted([str(t.hour).zfill(2) + ':' + str(t.minute).zfill(2) for t in times])
-                timesStr = ', '.join(timetable)
-                reply = 'У вас нет подписок на увдомления о температуре.'
-                if len(times) > 0:
-                    reply = 'Вы узнаете температуру ежедневно в {}.'.format(timesStr)
-                self.__send_message(chat_id, reply)
+                if self.__should_use_subscriptions:
+                    times = self.__scheduler.get_timetable_by_chat_id(chat_id)
+                    timetable = sorted([str(t.hour).zfill(2) + ':' + str(t.minute).zfill(2) for t in times])
+                    timesStr = ', '.join(timetable)
+                    reply = 'У вас нет подписок на увдомления о температуре.'
+                    if len(times) > 0:
+                        reply = 'Вы узнаете температуру ежедневно в {}.'.format(timesStr)
+                    self.__send_message(chat_id, reply)
+                else:
+                    self.__send_message(chat_id, "Подписки отключены")
             elif text == '/clear':
-                self.__scheduler.clear_subscriptions(chat_id)
+                if self.__should_use_subscriptions:
+                    self.__scheduler.clear_subscriptions(chat_id)
+                else:
+                    self.__send_message(chat_id, "Подписки отключены")
             elif not chat_id in notified_chat_ids:
                 self.__send_message(chat_id, temperature_message)
                 notified_chat_ids.add(chat_id)
                 # TODO: можно удалять бесполезное исходное сообщение см метод https://core.telegram.org/bots/api#deletemessage
                 # удалять нужно только прямые сообщения боту в чате с ботом, а не инлайн вызовы бота.
 
+
     def processSubscribers(self):
+        if not self.__should_use_subscriptions:
+            return
+
         now = datetime.datetime.now()
         delta = datetime.timedelta(minutes=1)
         if now - self.__subscribers_last_notification_time < delta:
