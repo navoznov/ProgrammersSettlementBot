@@ -22,7 +22,7 @@ def get_options():
     mqtt_topic = secret_data.mqtt_topic
 
     try:
-        longopts = ["bot-id=", "bot_key=", "mqtt-server=", "mqtt-topic=", "db-filename=", "use-subscriptions"]
+        longopts = ["bot-id=", "bot_key=", "mqtt-server=", "mqtt-topic=", "db-filename=", "use-subscriptions="]
         argv = sys.argv[1:]
         opts, args = getopt.getopt(argv, "i:k:u:t:d:s", longopts)
         options = {}
@@ -41,7 +41,7 @@ bot_api_key = options['bot_key']
 mqtt_broker_url = options['mqtt-server']
 mqtt_topic = options['mqtt-topic']
 db_filename = options['db-filename']
-should_use_subscriptions = "use-subscriptions" in options
+should_use_subscriptions = "use-subscriptions" in options and options['use-subscriptions'] == 'true'
 
 dataBaseProvider = DataBaseProvider(db_filename)
 scheduler = DataBaseScheduler(dataBaseProvider)
