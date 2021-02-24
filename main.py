@@ -3,7 +3,6 @@
 
 import sys
 import getopt
-import secret_data
 import time
 import datetime
 from DataBaseProvider import DataBaseProvider
@@ -16,11 +15,6 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 
 def get_options():
-    bot_id = secret_data.bot_id
-    bot_api_key = secret_data.bot_api_key
-    mqtt_broker_url = secret_data.mqtt_broker_url
-    mqtt_topic = secret_data.mqtt_topic
-
     try:
         longopts = ["bot-id=", "bot_key=", "mqtt-server=", "mqtt-topic=", "db-filename=", "use-subscriptions="]
         argv = sys.argv[1:]
