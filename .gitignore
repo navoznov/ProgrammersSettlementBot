@@ -5,3 +5,4 @@ run.sh
 .vscode/launch.json
 testTelegramResponse.txt
 *.db
+.vscode/*
