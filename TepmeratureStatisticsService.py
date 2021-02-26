@@ -6,7 +6,7 @@ import datetime
 from MqttTemperatureProvider import MqttTemperatureProvider
 
 
-class StatisticsService:
+class TepmeratureStatisticsService:
     def __init__(self, mqtt_temperature_provider):
         self.__mqtt_temperature_provider = mqtt_temperature_provider
 

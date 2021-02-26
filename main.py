@@ -10,7 +10,7 @@ from DataBaseScheduler import DataBaseScheduler
 from TelegramBot import TelegramBot
 from MqttTemperatureProvider import MqttTemperatureProvider
 from MemoryScheduler import MemoryScheduler
-from StatisticsService import StatisticsService
+from TepmeratureStatisticsService import TepmeratureStatisticsService
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
@@ -41,7 +41,7 @@ dataBaseProvider = DataBaseProvider(db_filename)
 scheduler = DataBaseScheduler(dataBaseProvider)
 mqttTemperatureProvider = MqttTemperatureProvider(mqtt_broker_url, mqtt_topic)
 telegramBot = TelegramBot(bot_id, bot_api_key, should_use_subscriptions, mqttTemperatureProvider, scheduler)
-statisticsService = StatisticsService(mqttTemperatureProvider)
+TepmeratureStatisticsService = TepmeratureStatisticsService(mqttTemperatureProvider)
 
 LOG_FILE = 'error.log'
 file_logger = TimedRotatingFileHandler('log')
@@ -50,7 +50,7 @@ TICK_INTERVAL_SEC = 5
 while True:
     try:
         telegramBot.processUpdates()
-        # statisticsService.tick()
+        # TepmeratureStatisticsService.tick()
         telegramBot.processSubscribers()
     except Exception as e:
         file_logger.error()
