@@ -131,7 +131,7 @@ class TelegramBot:
             # list - Вывести список запланированных уведомлений
             # clear - Удалить все запланированные уведомления
 
-            text = message['text']
+            text = message.get('text', None)
             if text == '/start':
                 # TODO: поля username может не быть
                 name = username or message['from'].get('first_name', None)
@@ -144,7 +144,6 @@ class TelegramBot:
                     self.__schedule_awaiting_chat_ids.add(chat_id)
                 else:
                     self.__send_message(chat_id, "Подписки отключены")
-
             elif chat_id in self.__schedule_awaiting_chat_ids:
                 is_success, time = self.__parseTime(text)
                 if is_success:
